@@ -19,17 +19,15 @@ const hexToRgb = (hex: string) => {
   return rgbCode as RgbColor;
 };
 
-export const getRgbCode = (hexColor: string) => {
+const getRgbCode = (hexColor: string) => {
   const rgb: RgbColor | null = hexToRgb(hexColor);
 
   if (rgb !== null) return `${rgb.r}, ${rgb.g} , ${rgb.b}`;
 };
 
-function hexToRgbaOpacity (hexColor: string, opacity: number){
-  const rgbCode = getRgbCode(hexColor);
-
-  return `rgba(${rgbCode}, ${opacity})`;
-}
+const opacityToHexNumber = (opacity: number) => {
+  return Math.round(opacity * 255).toString(16);
+};
 
 function RGBAToHexA(r: ColorCode, g: ColorCode, b: ColorCode, a: number) {
   let forceRemoveAlpha = false;
@@ -47,7 +45,25 @@ function RGBAToHexA(r: ColorCode, g: ColorCode, b: ColorCode, a: number) {
   );
 }
 
+function hexWithAlpha(hexColor: string, opacity: number) {
+  const parsedHex = hexColor.replace(
+      /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+      (m, r, g, b) => r + r + g + g + b + b
+  );
+
+  if (opacity > 1 || opacity < 0) return parsedHex;
+
+  return parsedHex + opacityToHexNumber(opacity);
+}
+
+function hexToRGBA (hexColor: string, opacity: number){
+  const rgbCode = getRgbCode(hexColor);
+
+  return `rgba(${rgbCode}, ${opacity})`;
+}
+
 export default {
-  hexToRgba: hexToRgbaOpacity,
+  hexToRgba: hexToRGBA,
   rgbaToHex: RGBAToHexA,
+  hexWithAlpha
 };
