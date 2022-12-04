@@ -6,8 +6,6 @@ const hexToRgb = (hex: string) => {
       (m, r, g, b) => r + r + g + g + b + b
   );
 
-  console.log(hex, parsedHex);
-
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(parsedHex);
 
   if (!result) return null;
