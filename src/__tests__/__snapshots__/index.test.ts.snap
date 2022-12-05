@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HEX to HEXA with invalid params: invalid color 1`] = `"Invalid HEX param"`;
+
+exports[`HEX to HEXA with invalid params: opacity 12 1`] = `"Invalid opacity, it should be between 0 and 1"`;
+
+exports[`HEX to RGBA with invalid params: invalid color 1`] = `"Invalid HEX param"`;
+
+exports[`HEX to RGBA with invalid params: opacity 12 1`] = `"Invalid opacity, it should be between 0 and 1"`;
+
+exports[`RGB to HEXA with invalid params: opacity 10 1`] = `"Invalid opacity, it should be between 0 and 1"`;
