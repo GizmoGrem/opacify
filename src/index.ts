@@ -1,11 +1,13 @@
 import { RgbColor, ColorCode } from './types';
 
+const isValidHEX = (hex: string) => /^#[0-9A-F]{6}$/i.test(hex);
+
 const hexToRgb = (hex: string) => {
   const parsedHex = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => r + r + g + g + b + b);
 
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(parsedHex);
 
-  if (!result) return null;
+  if (!result) throw new Error('Invalid HEX color, cannot convert to RGB');
 
   const rgbCode = {
     r: parseInt(result[1], 16),
@@ -17,24 +19,22 @@ const hexToRgb = (hex: string) => {
 };
 
 const getRgbCode = (hexColor: string) => {
-  const rgb: RgbColor | null = hexToRgb(hexColor);
+  const rgb: RgbColor = hexToRgb(hexColor);
 
-  if (rgb !== null) return `${rgb.r}, ${rgb.g} , ${rgb.b}`;
+  return `${rgb.r}, ${rgb.g} , ${rgb.b}`;
 };
 
 const opacityToHexNumber = (opacity: number) => {
   return Math.round(opacity * 255).toString(16);
 };
 
-function RGBAToHexA(r: ColorCode, g: ColorCode, b: ColorCode, a: number) {
-  let forceRemoveAlpha = false;
-  if (arguments.length > 4) return false;
-  if (a > 1 || a < 0) forceRemoveAlpha = true;
+export function RGBAToHexA(r: ColorCode, g: ColorCode, b: ColorCode, a: number) {
+  if (arguments.length > 4) throw new Error('Too many arguments');
+  if (a > 1 || a < 0) throw new Error('Invalid opacity, it should be between 0 and 1');
 
   return (
     '#' +
     [r, g, b, a]
-      .filter((value, index) => !forceRemoveAlpha || index !== 3)
       .map((value, index) => (index === 3 ? Math.round(value * 255) : value)) // Converts alpha to 255 number
       .map((value) => value.toString(16)) // Converts numbers to hex
       .map((hexValue) => (hexValue.length === 1 ? '0' + hexValue : hexValue)) // Adds 0 when length of one number is 1
@@ -42,22 +42,38 @@ function RGBAToHexA(r: ColorCode, g: ColorCode, b: ColorCode, a: number) {
   );
 }
 
-function hexWithAlpha(hexColor: string, opacity: number) {
+export function hexWithAlpha(hexColor: string, opacity: number) {
   const parsedHex = hexColor.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => r + r + g + g + b + b);
 
-  if (opacity > 1 || opacity < 0) return parsedHex;
+  if (!isValidHEX(parsedHex)) throw new Error('Invalid HEX param');
+
+  if (opacity > 1 || opacity < 0) throw new Error('Invalid opacity, it should be between 0 and 1');
 
   return parsedHex + opacityToHexNumber(opacity);
 }
 
-function hexToRGBA(hexColor: string, opacity: number) {
+export function hexToRGBA(hexColor: string, opacity: number) {
+  if (arguments.length > 2) throw new Error('Too many arguments');
+
+  if (!isValidHEX(hexColor)) throw new Error('Invalid HEX param');
+
   const rgbCode = getRgbCode(hexColor);
+
+  if (opacity > 1 || opacity < 0) throw new Error('Invalid opacity, it should be between 0 and 1');
 
   return `rgba(${rgbCode}, ${opacity})`;
 }
 
+function wrapper(func: Function) {
+  try {
+    return func();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export default {
-  hexToRgba: hexToRGBA,
-  rgbaToHex: RGBAToHexA,
-  hexWithAlpha,
+  hexToRgba: (hexColor: string, opacity: number) => wrapper(() => hexToRGBA(hexColor, opacity)),
+  rgbaToHex: (r: ColorCode, g: ColorCode, b: ColorCode, a: number) => wrapper(() => RGBAToHexA(r, g, b, a)),
+  hexWithAlpha: (hexColor: string, opacity: number) => wrapper(() => hexWithAlpha(hexColor, opacity)),
 };
