@@ -64,7 +64,7 @@ export function hexToRGBA(hexColor: string, opacity: number) {
   return `rgba(${rgbCode}, ${opacity})`;
 }
 
-function wrapper(func: Function) {
+function wrapper(func: () => void) {
   try {
     return func();
   } catch (e) {
